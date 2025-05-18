@@ -1,3 +1,28 @@
 @import 'tailwindcss';
-@plugin '@tailwindcss/forms';
-@plugin '@tailwindcss/typography';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components
+{
+    .btn-sidebar {
+        @apply p-4 bg-gray-700 hover:bg-gray-400 
+        text-white active:bg-white active:text-gray-700
+        rounded mb-2;
+    }
+    .btn-sidebar-disabled {
+        @apply p-4 bg-gray-700 hover:bg-gray-400 
+        text-white rounded mb-2 opacity-30 cursor-not-allowed;
+    }
+    .modal-inputbox {
+        @apply outline bg-gray-100 rounded p-2 mb-2;
+    }
+    .modal-label {
+        @apply text-right p-2;
+    }
+    .btn-modal {
+        @apply outline rounded p-2 m-2 bg-gray-100
+        hover:bg-gray-400 active:text-white;
+    }
+}

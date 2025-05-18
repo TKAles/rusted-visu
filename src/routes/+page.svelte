@@ -3,7 +3,5 @@
 </script>
 
 <Layout title="VISU | Rusted Edition">
-<div>
-    put some shit here
-</div>
+
 </Layout>
