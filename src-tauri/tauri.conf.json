@@ -23,6 +23,7 @@
       "csp": null
     }
   },
+  "plugins": { "tauri": [ "dialog" ]},
   "bundle": {
     "active": true,
     "targets": "all",

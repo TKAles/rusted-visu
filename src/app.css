@@ -1,7 +1,6 @@
 @import 'tailwindcss';
 
 @tailwind base;
-@tailwind components;
 @tailwind utilities;
 
 @layer components
@@ -13,7 +12,7 @@
     }
     .btn-sidebar-disabled {
         @apply p-4 bg-gray-700 hover:bg-gray-400 
-        text-white rounded mb-2 opacity-30 cursor-not-allowed;
+        text-white rounded mb-2 opacity-30 ;
     }
     .modal-inputbox {
         @apply outline bg-gray-100 rounded p-2 mb-2;
