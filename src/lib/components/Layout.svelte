@@ -2,12 +2,19 @@
 	
 
 	import Modal from './Modal.svelte';
+	import StartupScreen from './StartupScreen.svelte';
+	import ScanningScreen from './ScanningScreen.svelte';
+	import { writable } from 'svelte/store';
 	import { invoke } from '@tauri-apps/api/core';
 	export let isPropertiesOpen: boolean = false;
 	export let WFMFolderSelected: boolean = false;
 	export let DCScansProcessed: boolean = false;
 	export let FFTsComputed: boolean = false;
-
+	export const applicationViewState = writable('justLoaded');
+	const possibleApplicationViews = {
+		'justLoaded': StartupScreen,
+		'scanCheck': ScanningScreen
+	}
 	function togglePropertieModal(){
 		isPropertiesOpen = !isPropertiesOpen;
 	}
