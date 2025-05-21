@@ -2,6 +2,7 @@
 	
 
 	import Modal from './Modal.svelte';
+	import { invoke } from '@tauri-apps/api/core';
 	export let isPropertiesOpen: boolean = false;
 	export let WFMFolderSelected: boolean = false;
 	export let DCScansProcessed: boolean = false;
@@ -11,6 +12,7 @@
 		isPropertiesOpen = !isPropertiesOpen;
 	}
 	function selectWFMFolder(){
+		pickWFMFolder();
 		WFMFolderSelected = true;
 	}
 	function launchScanCheck() {
@@ -22,7 +24,19 @@
 	function processFFTs() {
 		FFTsComputed = true;
 	}	
-
+	async function pickWFMFolder()
+	{
+		try {
+			const result = await invoke<string | null>('get_wfmdir');
+			if(result) {
+				console.log('Folder Selected Was: ', result);
+			} else {
+				console.log('Dialog was closed out');
+			}
+		} catch (error) {
+			console.error('Failed to select folder:', error);
+		}
+	}
 </script>
 	
 <main class="flex w-full h-screen bg-gray-200 text-gray-900">

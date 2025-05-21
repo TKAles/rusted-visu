@@ -1,32 +1,29 @@
-// Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-use dirs::desktop_dir;
+use tauri::{Manager, Runtime, AppHandle, Window};
 use std::path::PathBuf;
-use tauri::{generate_handler, Window};
-use tauri_plugin_dialog::DialogExt;
+use tauri_plugin_dialog::{DialogExt, FilePath};
+
+#[tauri::command]
+fn test_fn() -> String {
+  "Hello from Rust".to_string()
+}
+
+#[tauri::command]
+async fn get_wfmdir<R: Runtime>(app: AppHandle<R>) -> String {
+    let folder_dialog = app.dialog().file();
+    let dialog_result = folder_dialog.blocking_pick_folder();
+    match dialog_result {
+      Some(path) => path.to_string(),
+      None => "".to_string()
+    }
+}    
 
 fn main() {
   tauri::Builder::default()
     .plugin(tauri_plugin_dialog::init())
-    .invoke_handler(generate_handler![select_wfm_folder])
+    .invoke_handler(tauri::generate_handler![
+      get_wfmdir
+    ])
     .run(tauri::generate_context!())
-    .expect("error while running tauri application");
-}
-
-#[tauri::command]
-pub async fn select_wfm_folder(window: Window) ->
-  Result<Option<String>, String> {
-    let desktop_dir = desktop_dir().unwrap_or_else(|| PathBuf::from("."));
-    let selected_folder = window
-          .dialog()
-          .file()
-          .set_directory(desktop_dir)
-          .pick_folder()
-          .await;
-
-    match selected_folder {
-      Some(folder_path) => Ok(Some(folder_path.to_string_lossy().to_string())),
-      None => Ok(None),
-
-    }
+    .expect("Error while running tauri application!!");
 }

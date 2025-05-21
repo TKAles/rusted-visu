@@ -15,7 +15,9 @@
         "title": "VISU",
         "width": 800,
         "height": 600,
+        "visible": true,
         "resizable": true,
+        "maximized": false,
         "fullscreen": false
       }
     ],
@@ -23,7 +25,6 @@
       "csp": null
     }
   },
-  "plugins": { "tauri": [ "dialog" ]},
   "bundle": {
     "active": true,
     "targets": "all",
