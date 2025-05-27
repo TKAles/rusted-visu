@@ -1,71 +1,110 @@
 <script lang="ts">
-	
-
 	import Modal from './Modal.svelte';
+	import { currentView, selectedPath, isDCProcessed,
+		isFFTProcessed, isVMapProcessed, VIEW_STATES, viewHelpers } from '$lib/stores.js';
 	import StartupScreen from './StartupScreen.svelte';
 	import ScanningScreen from './ScanningScreen.svelte';
-	import { writable } from 'svelte/store';
+	
 	import { invoke } from '@tauri-apps/api/core';
-	export let isPropertiesOpen: boolean = false;
-	export let WFMFolderSelected: boolean = false;
-	export let DCScansProcessed: boolean = false;
-	export let FFTsComputed: boolean = false;
-	export const applicationViewState = writable('justLoaded');
-	const possibleApplicationViews = {
-		'justLoaded': StartupScreen,
-		'scanCheck': ScanningScreen
-	}
+	import { resolveRoute } from '$app/paths';
+
+	let isPropertiesOpen: Boolean = false;
+	let WFMFolderSelected: Boolean = false;
+	let DCScansProcessed: Boolean = false;
+	let FFTsComputed: Boolean = false;
+
+	// Initialize the view to startup screen
+	currentView.set(VIEW_STATES.STARTUP);
+
 	function togglePropertieModal(){
 		isPropertiesOpen = !isPropertiesOpen;
 	}
-	function selectWFMFolder(){
-		pickWFMFolder();
-		WFMFolderSelected = true;
+
+	async function selectWFMFolder(){
+		let selected_folder: string = await pickWFMFolder();
+		selectedPath.set(selected_folder);
+		if(selected_folder && selected_folder.length > 0) {
+			WFMFolderSelected = true;
+			// Switch to a different view after folder selection
+			currentView.set(VIEW_STATES.FOLDER_SELECTED);
+		}
 	}
+
 	function launchScanCheck() {
+		currentView.set(VIEW_STATES.SCANNING);
 		return;
 	}
+
 	function processDCScans() {
 		DCScansProcessed = true;
+		isDCProcessed.set(true);
+		currentView.set(VIEW_STATES.DC_PROCESSING);
 	}
+
 	function processFFTs() {
 		FFTsComputed = true;
+		isFFTProcessed.set(true);
+		currentView.set(VIEW_STATES.FFT_PROCESSING);
 	}	
-	async function pickWFMFolder()
-	{
+
+	async function pickWFMFolder() {
 		try {
-			const result = await invoke<string | null>('get_wfmdir');
-			if(result) {
-				console.log('Folder Selected Was: ', result);
-			} else {
-				console.log('Dialog was closed out');
+			const result = await invoke<string[]>('get_wfmdir');
+			if(result.length != 0) {
+				console.log('Found {0} WFM files in the directory.', result.length);
 			}
+			return result;
 		} catch (error) {
 			console.error('Failed to select folder:', error);
+			WFMFolderSelected = false;
+			return "";
+		}
+	}
+
+	// Function to get the component to render based on current view
+	function getViewComponent(view: string) {
+		switch(view) {
+			case VIEW_STATES.STARTUP:
+				return StartupScreen;
+			case VIEW_STATES.SCANNING:
+				return ScanningScreen;
+			case VIEW_STATES.FOLDER_SELECTED:
+				return StartupScreen; // or create a FolderSelectedScreen component
+			case VIEW_STATES.DC_PROCESSING:
+				return ScanningScreen; // or create a DCProcessingScreen component
+			case VIEW_STATES.FFT_PROCESSING:
+				return ScanningScreen; // or create a FFTProcessingScreen component
+			default:
+				return StartupScreen;
 		}
 	}
 </script>
 	
 <main class="flex w-full h-screen bg-gray-200 text-gray-900">
 	<aside class="w-1/3 bg-gray-600 h-full p-4 flex flex-col max-w-64">
-	<button on:click={selectWFMFolder} class="btn-sidebar">Open WFM Folder</button>
-	<button on:click={launchScanCheck} class="{!WFMFolderSelected ? 'btn-sidebar-disabled' : 'btn-sidebar'}"
-	disabled={!WFMFolderSelected}>
-		Check Scans</button>
-	<button on:click={processDCScans} class="{!WFMFolderSelected ? 'btn-sidebar-disabled' : 'btn-sidebar'}" 
-	disabled={!WFMFolderSelected}>
-		Process DC Maps</button>
-	<button class="{!DCScansProcessed ? 'btn-sidebar-disabled' : 'btn-sidebar'}">
-		Export DC CSV</button>
-	<button on:click={processFFTs} class="{!DCScansProcessed ? 'btn-sidebar-disabled' : 'btn-sidebar'}" 
-	disabled={!DCScansProcessed}>
-		Process FFT Maps</button>
-	<button class="{!FFTsComputed ? 'btn-sidebar-disabled' : 'btn-sidebar'}">Export FFT CSV</button>
-	<button on:click={togglePropertieModal} class="{!WFMFolderSelected ? 'btn-sidebar-disabled' : 'btn-sidebar'}"
-	disabled={!WFMFolderSelected}>Edit Scan Properties</button>			
+		<button on:click={selectWFMFolder} class="btn-sidebar">Open WFM Folder</button>
+		<button on:click={launchScanCheck} class="{!WFMFolderSelected ? 'btn-sidebar-disabled' : 'btn-sidebar'}"
+		disabled={!WFMFolderSelected}>
+			Check Scans</button>
+		<button on:click={processDCScans} class="{!WFMFolderSelected ? 'btn-sidebar-disabled' : 'btn-sidebar'}" 
+		disabled={!WFMFolderSelected}>
+			Process DC Maps</button>
+		<button class="{!DCScansProcessed ? 'btn-sidebar-disabled' : 'btn-sidebar'}">
+			Export DC CSV</button>
+		<button on:click={processFFTs} class="{!DCScansProcessed ? 'btn-sidebar-disabled' : 'btn-sidebar'}" 
+		disabled={!DCScansProcessed}>
+			Process FFT Maps</button>
+		<button class="{!FFTsComputed ? 'btn-sidebar-disabled' : 'btn-sidebar'}">Export FFT CSV</button>
+		<button on:click={togglePropertieModal} class="{!WFMFolderSelected ? 'btn-sidebar-disabled' : 'btn-sidebar'}"
+		disabled={!WFMFolderSelected}>Edit Scan Properties</button>			
 	</aside>
 	<section class="w-2/3 h-full p-4 flex flex-col gap-2">
-		<slot />
+		<!-- Dynamic component rendering based on currentView store -->
+		{#if $currentView}
+			<svelte:component this={getViewComponent($currentView)} />
+		{:else}
+			<StartupScreen />
+		{/if}
 	</section>
 </main>
 <Modal isOpen={isPropertiesOpen} onClose={togglePropertieModal}/>
