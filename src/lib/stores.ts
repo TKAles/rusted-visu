@@ -18,10 +18,11 @@ export type ViewState = typeof VIEW_STATES[keyof typeof VIEW_STATES];
 export const currentView = writable<ViewState>(VIEW_STATES.STARTUP);
 
 // Your existing stores
-export const selectedPath = writable<string>('');
+export const foundWFMFiles = writable<string[]>();
 export const isDCProcessed = writable<boolean>(false);
 export const isFFTProcessed = writable<boolean>(false);
 export const isVMapProcessed = writable<boolean>(false);
+export const WFMFolderSelected = writable<boolean>(false);
 
 // Optional: Helper functions for common view transitions
 export const viewHelpers = {

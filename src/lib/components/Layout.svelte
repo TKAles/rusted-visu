@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Modal from './Modal.svelte';
-	import { currentView, selectedPath, isDCProcessed,
+	import { currentView, WFMFolderSelected, foundWFMFiles, isDCProcessed,
 		isFFTProcessed, isVMapProcessed, VIEW_STATES, viewHelpers } from '$lib/stores.js';
 	import StartupScreen from './StartupScreen.svelte';
 	import ScanningScreen from './ScanningScreen.svelte';
@@ -9,7 +9,6 @@
 	import { resolveRoute } from '$app/paths';
 
 	let isPropertiesOpen: Boolean = false;
-	let WFMFolderSelected: Boolean = false;
 	let DCScansProcessed: Boolean = false;
 	let FFTsComputed: Boolean = false;
 
@@ -21,12 +20,14 @@
 	}
 
 	async function selectWFMFolder(){
-		let selected_folder: string = await pickWFMFolder();
-		selectedPath.set(selected_folder);
+		let selected_folder: string[] = await pickWFMFolder();
 		if(selected_folder && selected_folder.length > 0) {
-			WFMFolderSelected = true;
+			WFMFolderSelected.set(true);
+			foundWFMFiles.set(selected_folder);
 			// Switch to a different view after folder selection
 			currentView.set(VIEW_STATES.FOLDER_SELECTED);
+		} else {
+			WFMFolderSelected.set(false);
 		}
 	}
 
@@ -56,8 +57,8 @@
 			return result;
 		} catch (error) {
 			console.error('Failed to select folder:', error);
-			WFMFolderSelected = false;
-			return "";
+			WFMFolderSelected.set(false);
+			return [];
 		}
 	}
 
@@ -80,8 +81,8 @@
 	}
 </script>
 	
-<main class="flex w-full h-screen bg-gray-200 text-gray-900">
-	<aside class="w-1/3 bg-gray-600 h-full p-4 flex flex-col max-w-64">
+<main class="flex w-screen h-screen bg-gray-200 text-gray-900 overflow-hidden">
+	<aside class="w-1/3 bg-gray-600 h-full p-4 flex flex-col max-w-64 flex-shrink-0">
 		<button on:click={selectWFMFolder} class="btn-sidebar">Open WFM Folder</button>
 		<button on:click={launchScanCheck} class="{!WFMFolderSelected ? 'btn-sidebar-disabled' : 'btn-sidebar'}"
 		disabled={!WFMFolderSelected}>
@@ -98,13 +99,15 @@
 		<button on:click={togglePropertieModal} class="{!WFMFolderSelected ? 'btn-sidebar-disabled' : 'btn-sidebar'}"
 		disabled={!WFMFolderSelected}>Edit Scan Properties</button>			
 	</aside>
-	<section class="w-2/3 h-full p-4 flex flex-col gap-2">
+	<section class="flex-1 h-full p-4 flex flex-col gap-2 overflow-hidden min-w-0">
+		<div class="flex-1 overflow-y-auto overflow-x-hidden">
 		<!-- Dynamic component rendering based on currentView store -->
 		{#if $currentView}
 			<svelte:component this={getViewComponent($currentView)} />
 		{:else}
 			<StartupScreen />
 		{/if}
+	</div>
 	</section>
 </main>
 <Modal isOpen={isPropertiesOpen} onClose={togglePropertieModal}/>
