@@ -11,7 +11,6 @@
 	let isPropertiesOpen: Boolean = false;
 	let DCScansProcessed: Boolean = false;
 	let FFTsComputed: Boolean = false;
-
 	// Initialize the view to startup screen
 	currentView.set(VIEW_STATES.STARTUP);
 
@@ -84,11 +83,11 @@
 <main class="flex w-screen h-screen bg-gray-200 text-gray-900 overflow-hidden">
 	<aside class="w-1/3 bg-gray-600 h-full p-4 flex flex-col max-w-64 flex-shrink-0">
 		<button on:click={selectWFMFolder} class="btn-sidebar">Open WFM Folder</button>
-		<button on:click={launchScanCheck} class="{!WFMFolderSelected ? 'btn-sidebar-disabled' : 'btn-sidebar'}"
-		disabled={!WFMFolderSelected}>
+		<button on:click={launchScanCheck} class="{$WFMFolderSelected ?  'btn-sidebar' : 'btn-sidebar-disabled'}"
+		disabled={$WFMFolderSelected}>
 			Check Scans</button>
-		<button on:click={processDCScans} class="{!WFMFolderSelected ? 'btn-sidebar-disabled' : 'btn-sidebar'}" 
-		disabled={!WFMFolderSelected}>
+		<button on:click={processDCScans} class="{$WFMFolderSelected ? 'btn-sidebar' : 'btn-sidebar-disabled'}" 
+		disabled={$WFMFolderSelected}>
 			Process DC Maps</button>
 		<button class="{!DCScansProcessed ? 'btn-sidebar-disabled' : 'btn-sidebar'}">
 			Export DC CSV</button>

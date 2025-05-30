@@ -23,6 +23,7 @@ export const isDCProcessed = writable<boolean>(false);
 export const isFFTProcessed = writable<boolean>(false);
 export const isVMapProcessed = writable<boolean>(false);
 export const WFMFolderSelected = writable<boolean>(false);
+export const sortedWFMFiles = writable<string[][][]>();
 
 // Optional: Helper functions for common view transitions
 export const viewHelpers = {
